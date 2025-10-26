@@ -35,34 +35,77 @@ if (process.env.NODE_ENV === 'development') {
   app.use(logger);
 }
 
-// Initialize app (seed users if needed)
-const initializeApp = async () => {
+// Track if initialization has been attempted
+let isInitialized = false;
+
+// Initialize app (seed users if needed) - with retry logic
+const initializeApp = async (retryCount = 0, maxRetries = 5) => {
   try {
     const User = require('./models/User');
+    
+    // Test if we can query the database
     const userCount = await User.countDocuments();
     
     if (userCount === 0) {
       console.log('🌱 No users found. Creating your admin user...');
       const seedUsers = require('./scripts/seedUsers');
       await seedUsers();
+      console.log('✅ User initialization complete');
     } else {
       console.log(`✅ Found ${userCount} existing user(s)`);
-      // Show user info
-      const users = await User.find().select('email username role');
+      // Show user emails
+      const users = await User.find().select('email username role isActive');
       users.forEach(u => {
-        console.log(`   - ${u.email} (${u.role})`);
+        const status = u.isActive ? '✅' : '❌';
+        console.log(`   ${status} ${u.email} (${u.role})`);
       });
     }
+    
+    isInitialized = true;
   } catch (error) {
-    console.error('❌ Failed to initialize app:', error);
+    console.error(`❌ Failed to initialize app (attempt ${retryCount + 1}/${maxRetries}):`, error.message);
+    
+    if (retryCount < maxRetries - 1) {
+      const delay = 2000; // 2 seconds
+      console.log(`⏳ Retrying in ${delay / 1000} seconds...`);
+      
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return initializeApp(retryCount + 1, maxRetries);
+    } else {
+      console.error('❌ Max retries reached. Application will continue without user initialization.');
+      console.error('💡 You can manually seed users by running: npm run seed-users');
+    }
   }
 };
 
-// Wait for MongoDB connection before initializing
+// Handle MongoDB connection events
 const mongoose = require('mongoose');
+
+// On initial connection
 mongoose.connection.once('open', () => {
-  console.log('📡 MongoDB connection established');
+  console.log('📡 MongoDB connection established (initial)');
   initializeApp();
+});
+
+// On reconnection after disconnect
+mongoose.connection.on('reconnected', () => {
+  console.log('🔄 MongoDB reconnected');
+  if (!isInitialized) {
+    console.log('🔄 Running initialization after reconnection...');
+    initializeApp();
+  } else {
+    console.log('✅ Initialization already completed, skipping...');
+  }
+});
+
+// On disconnection
+mongoose.connection.on('disconnected', () => {
+  console.warn('⚠️  MongoDB disconnected');
+});
+
+// On connection error
+mongoose.connection.on('error', (err) => {
+  console.error('❌ MongoDB connection error:', err.message);
 });
 
 // Routes
@@ -76,6 +119,10 @@ app.get('/', (req, res) => {
       auth: '/api/auth',
       tasks: '/api/tasks',
       todos: '/api/todos',
+    },
+    database: {
+      status: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+      initialized: isInitialized,
     },
   });
 });
@@ -99,13 +146,41 @@ app.use(errorHandler);
 // Start server
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔗 API URL: http://localhost:${PORT}`);
+  console.log(`🔗 Health Check: http://localhost:${PORT}/api/health`);
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 });
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
   console.error(`❌ Unhandled Rejection: ${err.message}`);
   server.close(() => process.exit(1));
+});
+
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+  console.log('🛑 SIGTERM received. Shutting down gracefully...');
+  server.close(() => {
+    console.log('✅ Server closed');
+    mongoose.connection.close(false, () => {
+      console.log('✅ MongoDB connection closed');
+      process.exit(0);
+    });
+  });
+});
+
+process.on('SIGINT', async () => {
+  console.log('\n🛑 SIGINT received. Shutting down gracefully...');
+  server.close(() => {
+    console.log('✅ Server closed');
+    mongoose.connection.close(false, () => {
+      console.log('✅ MongoDB connection closed');
+      process.exit(0);
+    });
+  });
 });
 
 module.exports = app;

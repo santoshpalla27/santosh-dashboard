@@ -3,27 +3,41 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 
 const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log('✅ MongoDB Connected');
-  } catch (error) {
-    console.error(`❌ Error: ${error.message}`);
-    process.exit(1);
+  if (mongoose.connection.readyState === 0) {
+    try {
+      await mongoose.connect(process.env.MONGO_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      });
+      console.log('✅ MongoDB Connected');
+    } catch (error) {
+      console.error(`❌ Error: ${error.message}`);
+      throw error;
+    }
   }
 };
 
 const seedUsers = async () => {
   try {
+    // Connect only if not already connected
     await connectDB();
 
-    // Delete ALL existing users
+    // Check if users exist
+    const userCount = await User.countDocuments();
+    
+    if (userCount > 0) {
+      console.log(`⚠️  ${userCount} user(s) already exist. Skipping seed...`);
+      if (require.main === module) {
+        process.exit(0);
+      }
+      return;
+    }
+
+    // Delete ALL existing users (just to be safe)
     await User.deleteMany({});
     console.log('🗑️  Cleared all existing users');
 
-    // Create only your user
+    // Create your admin user
     console.log('Creating your admin user...');
     const user = new User({
       email: 'santoshpalla27@gmail.com',
@@ -46,11 +60,17 @@ const seedUsers = async () => {
     console.log('Role: Admin');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
-    process.exit(0);
+    // Only exit if run directly from command line
+    if (require.main === module) {
+      process.exit(0);
+    }
   } catch (error) {
     console.error(`❌ Error seeding users: ${error.message}`);
     console.error(error);
-    process.exit(1);
+    if (require.main === module) {
+      process.exit(1);
+    }
+    throw error;
   }
 };
 
