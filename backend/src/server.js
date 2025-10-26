@@ -42,11 +42,16 @@ const initializeApp = async () => {
     const userCount = await User.countDocuments();
     
     if (userCount === 0) {
-      console.log('🌱 No users found. Running initial seed...');
+      console.log('🌱 No users found. Creating your admin user...');
       const seedUsers = require('./scripts/seedUsers');
       await seedUsers();
     } else {
-      console.log(`✅ Found ${userCount} existing users`);
+      console.log(`✅ Found ${userCount} existing user(s)`);
+      // Show user info
+      const users = await User.find().select('email username role');
+      users.forEach(u => {
+        console.log(`   - ${u.email} (${u.role})`);
+      });
     }
   } catch (error) {
     console.error('❌ Failed to initialize app:', error);

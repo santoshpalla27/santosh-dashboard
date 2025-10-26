@@ -19,16 +19,12 @@ const seedUsers = async () => {
   try {
     await connectDB();
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email: 'santoshpalla27@gmail.com' });
-    
-    if (existingUser) {
-      console.log('⚠️  User already exists. Skipping seed...');
-      process.exit(0);
-    }
+    // Delete ALL existing users
+    await User.deleteMany({});
+    console.log('🗑️  Cleared all existing users');
 
-    // Create default user
-    console.log('Creating default user...');
+    // Create only your user
+    console.log('Creating your admin user...');
     const user = new User({
       email: 'santoshpalla27@gmail.com',
       password: 'santoshdashboard',
@@ -43,7 +39,7 @@ const seedUsers = async () => {
     console.log('✅ User created successfully');
 
     console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('📋 Login Credentials:');
+    console.log('📋 Your Login Credentials:');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('Email: santoshpalla27@gmail.com');
     console.log('Password: santoshdashboard');
