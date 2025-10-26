@@ -9,6 +9,7 @@ const logger = require('./middleware/logger');
 
 // Route imports
 const healthRoutes = require('./routes/health');
+const authRoutes = require('./routes/auth');
 const taskRoutes = require('./routes/tasks');
 const todoRoutes = require('./routes/todos');
 
@@ -19,7 +20,7 @@ const app = express();
 connectDB();
 
 // Middleware
-app.use(helmet()); // Security headers
+app.use(helmet());
 app.use(cors({
   origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
   credentials: true,
@@ -34,14 +35,40 @@ if (process.env.NODE_ENV === 'development') {
   app.use(logger);
 }
 
+// Initialize app (seed users if needed)
+const initializeApp = async () => {
+  try {
+    const User = require('./models/User');
+    const userCount = await User.countDocuments();
+    
+    if (userCount === 0) {
+      console.log('🌱 No users found. Running initial seed...');
+      const seedUsers = require('./scripts/seedUsers');
+      await seedUsers();
+    } else {
+      console.log(`✅ Found ${userCount} existing users`);
+    }
+  } catch (error) {
+    console.error('❌ Failed to initialize app:', error);
+  }
+};
+
+// Wait for MongoDB connection before initializing
+const mongoose = require('mongoose');
+mongoose.connection.once('open', () => {
+  console.log('📡 MongoDB connection established');
+  initializeApp();
+});
+
 // Routes
 app.get('/', (req, res) => {
   res.json({
     success: true,
-    message: 'Jira Dashboard API',
+    message: 'Santosh Dashboard API',
     version: process.env.API_VERSION || '1.0',
     endpoints: {
       health: '/api/health',
+      auth: '/api/auth',
       tasks: '/api/tasks',
       todos: '/api/todos',
     },
@@ -49,6 +76,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/health', healthRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/todos', todoRoutes);
 
