@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import FestivalCalendar from '../components/FestivalCalendar';
 
 const PersonalSpace = () => {
-  const [activeSection, setActiveSection] = useState('notes');
+  const [activeSection, setActiveSection] = useState('calendar');
 
   const sections = [
+    { id: 'calendar', label: 'Festival Calendar', icon: '📅' },
     { id: 'notes', label: 'Notes', icon: '📝' },
     { id: 'bookmarks', label: 'Bookmarks', icon: '🔖' },
     { id: 'goals', label: 'Goals', icon: '🎯' },
@@ -65,6 +67,15 @@ const PersonalSpace = () => {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.2 }}
               >
+                {/* Calendar Section */}
+                {activeSection === 'calendar' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    <FestivalCalendar />
+                  </motion.div>
+                )}
                 {/* Notes Section */}
                 {activeSection === 'notes' && (
                   <div>
