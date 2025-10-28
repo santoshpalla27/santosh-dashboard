@@ -4,7 +4,7 @@ import ConfirmDialog from './ConfirmDialog';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-const TaskCard = ({ task, index, onDelete }) => {
+const TaskCard = ({ task, index, onDelete, onView }) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -83,97 +83,91 @@ const TaskCard = ({ task, index, onDelete }) => {
     <>
       <Draggable draggableId={taskId} index={index}>
         {(provided, snapshot) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.draggableProps}
-                {...provided.dragHandleProps}
-                className={`bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4 mb-2 sm:mb-3 shadow-md cursor-grab active:cursor-grabbing transition-all group ${
-                  snapshot.isDragging 
-                    ? 'shadow-2xl ring-2 ring-blue-400 rotate-2 scale-105 opacity-90' 
-                    : 'hover:shadow-lg hover:scale-[1.02]'
-                }`}
-              >
-                {/* Header with Priority and Delete */}
-                <div className="flex items-start justify-between mb-2 gap-2">
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex-1 line-clamp-2">
-                    {task.title}
-                  </h3>
-                  <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getPriorityColor(
-                        task.priority
-                      )}`}
-                    >
-                      {task.priority}
-                    </span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowDeleteDialog(true);
-                      }}
-                      className="opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded text-red-500 hover:text-red-600"
-                      title="Delete task"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Description */}
-                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-                  {task.description}
-                </p>
-
-                {/* Tags and Assignee */}
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center flex-wrap gap-1">
-                    {task.tags?.slice(0, 2).map((tag, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                    {task.tags?.length > 2 && (
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        +{task.tags.length - 2}
-                      </span>
-                    )}
-                  </div>
-
-                  {task.assignee && (
-                    <div
-                      className="w-6 h-6 sm:w-7 sm:h-7 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 ml-2"
-                      title={task.assignee}
-                    >
-                      {task.assignee?.[0]?.toUpperCase() || '?'}
-                    </div>
-                  )}
-                </div>
-
-                {/* Footer */}
-                <div className="pt-2 sm:pt-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                  <span className="font-mono truncate">#{taskId.slice(-6)}</span>
-                  <span className="whitespace-nowrap ml-2">{task.date}</span>
-                </div>
+          <div
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+            onClick={(e) => {
+              // Don't trigger if clicking delete button
+              if (!e.target.closest('button')) {
+                onView && onView(task);
+              }
+            }}
+            className={`bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4 mb-2 sm:mb-3 shadow-md cursor-pointer transition-all group ${
+              snapshot.isDragging 
+                ? 'shadow-2xl ring-2 ring-blue-400 rotate-2 scale-105 opacity-90' 
+                : 'hover:shadow-lg hover:scale-[1.02]'
+            }`}
+          >
+            {/* Header with Priority and Delete */}
+            <div className="flex items-start justify-between mb-2 gap-2">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white flex-1 line-clamp-2">
+                {task.title}
+              </h3>
+              <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                <span
+                  className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getPriorityColor(
+                    task.priority
+                  )}`}
+                >
+                  {task.priority}
+                </span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowDeleteDialog(true);
+                  }}
+                  className="opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded text-red-500 hover:text-red-600"
+                  title="Delete task"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
+                  </svg>
+                </button>
               </div>
+            </div>
+
+            {/* Description */}
+            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+              {task.description}
+            </p>
+
+            {/* Tags */}
+            <div className="flex items-center flex-wrap gap-1 mb-3">
+              {task.tags?.slice(0, 3).map((tag, idx) => (
+                <span
+                  key={idx}
+                  className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded"
+                >
+                  {tag}
+                </span>
+              ))}
+              {task.tags?.length > 3 && (
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  +{task.tags.length - 3}
+                </span>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="pt-2 sm:pt-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+              <span className="font-mono truncate">#{taskId.slice(-6)}</span>
+              <span className="whitespace-nowrap ml-2">{task.date}</span>
+            </div>
+          </div>
         )}
       </Draggable>
 
-      {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         isOpen={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}

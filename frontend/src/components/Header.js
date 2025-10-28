@@ -62,19 +62,13 @@ const Header = ({ onTaskCreated }) => {
       >
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16">
-            {/* Logo */}
+            {/* Logo - Simplified */}
             <motion.div
-              className="flex items-center space-x-2 sm:space-x-3"
+              className="flex items-center"
               whileHover={{ scale: 1.05 }}
             >
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg sm:text-xl">J</span>
-              </div>
-              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white hidden xs:block">
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
                 Santosh Dashboard
-              </h1>
-              <h1 className="text-lg font-bold text-gray-900 dark:text-white xs:hidden">
-                Dashboard
               </h1>
             </motion.div>
 

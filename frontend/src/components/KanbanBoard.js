@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { motion } from 'framer-motion';
 import TaskCard from './TaskCard';
+import TaskDetailModal from './TaskDetailModal';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -21,6 +22,8 @@ const KanbanBoard = ({ taskCreated, setTaskCreated }) => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   const fetchTasks = useCallback(async () => {
     try {
@@ -132,6 +135,15 @@ const KanbanBoard = ({ taskCreated, setTaskCreated }) => {
     }
   };
 
+  const handleViewTask = (task) => {
+    setSelectedTask(task);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleUpdateTask = (updatedTask) => {
+    fetchTasks(); // Refresh tasks after update
+  };
+
   if (loading) {
     return (
       <div className="p-4 sm:p-6 flex items-center justify-center min-h-[400px]">
@@ -238,6 +250,7 @@ const KanbanBoard = ({ taskCreated, setTaskCreated }) => {
                         }} 
                         index={index}
                         onDelete={handleTaskDelete}
+                        onView={handleViewTask}
                       />
                     ))}
                     {provided.placeholder}
@@ -306,6 +319,7 @@ const KanbanBoard = ({ taskCreated, setTaskCreated }) => {
                         }} 
                         index={index}
                         onDelete={handleTaskDelete}
+                        onView={handleViewTask}
                       />
                     ))}
                     {provided.placeholder}
@@ -335,6 +349,12 @@ const KanbanBoard = ({ taskCreated, setTaskCreated }) => {
           ))}
         </div>
       </DragDropContext>
+      <TaskDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        task={selectedTask}
+        onUpdate={handleUpdateTask}
+      />
     </motion.div>
   );
 };

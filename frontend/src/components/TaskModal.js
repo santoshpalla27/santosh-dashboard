@@ -7,7 +7,6 @@ const TaskModal = ({ isOpen, onClose, onSubmit }) => {
     description: '',
     status: 'backlog',
     priority: 'medium',
-    assignee: '',
     tags: '',
   });
 
@@ -69,7 +68,6 @@ const TaskModal = ({ isOpen, onClose, onSubmit }) => {
         description: '',
         status: 'backlog',
         priority: 'medium',
-        assignee: '',
         tags: '',
       });
       setErrors({});
@@ -212,20 +210,7 @@ const TaskModal = ({ isOpen, onClose, onSubmit }) => {
                 </div>
               </div>
 
-              {/* Assignee */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Assignee
-                </label>
-                <input
-                  type="text"
-                  name="assignee"
-                  value={formData.assignee}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                  placeholder="Enter assignee name"
-                />
-              </div>
+
 
               {/* Tags */}
               <div>
