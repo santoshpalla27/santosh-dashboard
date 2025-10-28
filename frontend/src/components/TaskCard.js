@@ -61,7 +61,6 @@ const TaskCard = ({ task, index, onDelete }) => {
       const data = await response.json();
 
       if (data.success) {
-        console.log('Task deleted successfully');
         if (onDelete) {
           onDelete(task.id);
         }
@@ -171,7 +170,6 @@ const TaskCard = ({ task, index, onDelete }) => {
                   <span className="whitespace-nowrap ml-2">{task.date}</span>
                 </div>
               </div>
-          </div>
         )}
       </Draggable>
 

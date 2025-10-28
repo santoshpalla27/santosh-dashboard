@@ -81,7 +81,7 @@ const ConnectionStatus = () => {
     >
       <motion.div
         className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl overflow-hidden"
-        animate={{ width: isExpanded ? (window.innerWidth < 640 ? 260 : 300) : (window.innerWidth < 640 ? 48 : 60) }}
+        animate={{ width: isExpanded ? (typeof window !== 'undefined' && window.innerWidth < 640 ? 260 : 300) : (typeof window !== 'undefined' && window.innerWidth < 640 ? 48 : 60) }}
       >
         <div className="p-2 sm:p-3">
           <motion.button
