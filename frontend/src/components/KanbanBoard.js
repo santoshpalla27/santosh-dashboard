@@ -3,6 +3,7 @@ import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { motion } from 'framer-motion';
 import TaskCard from './TaskCard';
 import TaskDetailModal from './TaskDetailModal';
+import RecycleBinModal from './RecycleBinModal';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -24,6 +25,8 @@ const KanbanBoard = ({ taskCreated, setTaskCreated }) => {
   const [error, setError] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isRecycleBinOpen, setIsRecycleBinOpen] = useState(false);
+  const [deletedTasksCount, setDeletedTasksCount] = useState(0);
 
   const fetchTasks = useCallback(async () => {
     try {
@@ -61,6 +64,7 @@ const KanbanBoard = ({ taskCreated, setTaskCreated }) => {
 
   useEffect(() => {
     fetchTasks();
+    fetchDeletedCount();
   }, [fetchTasks]);
 
   useEffect(() => {
@@ -140,6 +144,23 @@ const KanbanBoard = ({ taskCreated, setTaskCreated }) => {
     setIsDetailModalOpen(true);
   };
 
+  const fetchDeletedCount = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/tasks/recyclebin`);
+      const data = await response.json();
+      if (data.success) {
+        setDeletedTasksCount(data.count);
+      }
+    } catch (err) {
+      console.error('Error fetching deleted tasks count:', err);
+    }
+  };
+
+  const handleTaskRestored = () => {
+    fetchTasks();
+    fetchDeletedCount();
+  };
+
   const handleUpdateTask = (updatedTask) => {
     fetchTasks(); // Refresh tasks after update
   };
@@ -187,27 +208,59 @@ const KanbanBoard = ({ taskCreated, setTaskCreated }) => {
             Drag and drop • Hover to delete
           </p>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={fetchTasks}
-          className="px-3 sm:px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center gap-2 text-sm sm:text-base w-full sm:w-auto justify-center"
-        >
-          <svg
-            className="w-4 h-4 sm:w-5 sm:h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        <div className="flex gap-2 w-full sm:w-auto">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsRecycleBinOpen(true)}
+            className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base relative"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-            />
-          </svg>
-          Refresh
-        </motion.button>
+            <svg
+              className="w-4 h-4 sm:w-5 sm:h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
+            </svg>
+            <span className="hidden sm:inline">Recycle Bin</span>
+            <span className="sm:hidden">Recycle</span>
+            {deletedTasksCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                {deletedTasksCount > 9 ? '9+' : deletedTasksCount}
+              </span>
+            )}
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              fetchTasks();
+              fetchDeletedCount();
+            }}
+            className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
+          >
+            <svg
+              className="w-4 h-4 sm:w-5 sm:h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
+            <span className="hidden sm:inline">Refresh</span>
+          </motion.button>
+        </div>
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
@@ -354,6 +407,12 @@ const KanbanBoard = ({ taskCreated, setTaskCreated }) => {
         onClose={() => setIsDetailModalOpen(false)}
         task={selectedTask}
         onUpdate={handleUpdateTask}
+      />
+      {/* Recycle Bin Modal */}
+      <RecycleBinModal
+        isOpen={isRecycleBinOpen}
+        onClose={() => setIsRecycleBinOpen(false)}
+        onTaskRestored={handleTaskRestored}
       />
     </motion.div>
   );
