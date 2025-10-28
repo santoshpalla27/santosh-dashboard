@@ -39,6 +39,22 @@ const taskSchema = new mongoose.Schema(
     dueDate: {
       type: Date,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    deletedAt: {
+      type: Date,
+      default: null,
+    },
+    comments: {
+      type: Array,
+      default: [],
+    },
+    attachments: {
+      type: Array,
+      default: [],
+    },
   },
   {
     timestamps: true,
@@ -47,6 +63,7 @@ const taskSchema = new mongoose.Schema(
 
 // Index for faster queries
 taskSchema.index({ status: 1, order: 1 });
+taskSchema.index({ isDeleted: 1 });
 
 // Virtual for formatted date
 taskSchema.virtual('formattedDate').get(function () {

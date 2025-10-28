@@ -18,11 +18,11 @@ const validateTask = [
 ];
 
 // @route   GET /api/tasks
-// @desc    Get all tasks grouped by status
+// @desc    Get all active tasks grouped by status
 // @access  Public
 router.get('/', async (req, res, next) => {
   try {
-    const tasks = await Task.find().sort({ order: 1, createdAt: -1 });
+    const tasks = await Task.find({ isDeleted: false }).sort({ order: 1, createdAt: -1 });
 
     // Group tasks by status
     const groupedTasks = {
@@ -42,6 +42,30 @@ router.get('/', async (req, res, next) => {
     res.json({
       success: true,
       data: groupedTasks,
+      count: tasks.length,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// @route   GET /api/tasks/recyclebin
+// @desc    Get all deleted tasks
+// @access  Public
+router.get('/recyclebin', async (req, res, next) => {
+  try {
+    const deletedTasks = await Task.find({ isDeleted: true }).sort({ deletedAt: -1 });
+
+    const tasks = deletedTasks.map((task) => {
+      const taskObj = task.toJSON();
+      taskObj.id = task._id.toString();
+      taskObj.date = taskObj.formattedDate;
+      return taskObj;
+    });
+
+    res.json({
+      success: true,
+      data: tasks,
       count: tasks.length,
     });
   } catch (error) {
@@ -189,10 +213,75 @@ router.put('/:id/move', async (req, res, next) => {
   }
 });
 
-// @route   DELETE /api/tasks/:id
-// @desc    Delete task
+// @route   DELETE /api/tasks/:id (Soft delete)
+// @desc    Move task to recycle bin
 // @access  Public
 router.delete('/:id', async (req, res, next) => {
+  try {
+    const task = await Task.findByIdAndUpdate(
+      req.params.id,
+      { 
+        isDeleted: true,
+        deletedAt: new Date(),
+      },
+      { new: true }
+    );
+
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        error: 'Task not found',
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Task moved to recycle bin',
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// @route   PUT /api/tasks/:id/restore
+// @desc    Restore task from recycle bin
+// @access  Public
+router.put('/:id/restore', async (req, res, next) => {
+  try {
+    const task = await Task.findByIdAndUpdate(
+      req.params.id,
+      { 
+        isDeleted: false,
+        deletedAt: null,
+      },
+      { new: true }
+    );
+
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        error: 'Task not found',
+      });
+    }
+
+    const taskObj = task.toJSON();
+    taskObj.id = task._id.toString();
+    taskObj.date = taskObj.formattedDate;
+
+    res.json({
+      success: true,
+      data: taskObj,
+      message: 'Task restored successfully',
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// @route   DELETE /api/tasks/:id/permanent
+// @desc    Permanently delete task
+// @access  Public
+router.delete('/:id/permanent', async (req, res, next) => {
   try {
     const task = await Task.findByIdAndDelete(req.params.id);
 
@@ -205,7 +294,24 @@ router.delete('/:id', async (req, res, next) => {
 
     res.json({
       success: true,
-      message: 'Task deleted successfully',
+      message: 'Task permanently deleted',
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// @route   DELETE /api/tasks/recyclebin/clear
+// @desc    Clear all deleted tasks permanently
+// @access  Public
+router.delete('/recyclebin/clear', async (req, res, next) => {
+  try {
+    const result = await Task.deleteMany({ isDeleted: true });
+
+    res.json({
+      success: true,
+      message: `Permanently deleted ${result.deletedCount} tasks`,
+      deletedCount: result.deletedCount,
     });
   } catch (error) {
     next(error);

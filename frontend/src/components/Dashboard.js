@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import KanbanBoard from './KanbanBoard';
 import TodoList from './TodoList';
+import RecycleBin from './RecycleBin';
 
 const Dashboard = ({ taskCreated, setTaskCreated }) => {
   const [activeTab, setActiveTab] = useState('kanban');
@@ -10,6 +11,7 @@ const Dashboard = ({ taskCreated, setTaskCreated }) => {
   const tabs = [
     { id: 'kanban', label: 'Kanban Board', icon: '📊', shortLabel: 'Kanban' },
     { id: 'todo', label: 'To-Do List', icon: '✅', shortLabel: 'Todo' },
+    { id: 'recycle', label: 'Recycle Bin', icon: '🗑️', shortLabel: 'Recycle' },
   ];
 
   const handleConvertToTask = (task) => {
@@ -55,14 +57,14 @@ const Dashboard = ({ taskCreated, setTaskCreated }) => {
 
         {/* Tab Navigation */}
         <div className="bg-white dark:bg-gray-800 shadow-sm">
-          <div className="flex space-x-1 p-2">
+          <div className="flex space-x-1 p-2 overflow-x-auto">
             {tabs.map((tab) => (
               <motion.button
                 key={tab.id}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 px-3 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition-all text-sm sm:text-base ${
+                className={`flex-1 min-w-[100px] px-3 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition-all text-sm sm:text-base whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'bg-blue-500 text-white shadow-lg'
                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -92,6 +94,9 @@ const Dashboard = ({ taskCreated, setTaskCreated }) => {
           )}
           {activeTab === 'todo' && (
             <TodoList onConvertToTask={handleConvertToTask} />
+          )}
+          {activeTab === 'recycle' && (
+            <RecycleBin />
           )}
         </motion.div>
       </div>
