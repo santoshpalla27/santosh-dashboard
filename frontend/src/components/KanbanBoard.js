@@ -81,41 +81,26 @@ const KanbanBoard = ({ taskCreated, setTaskCreated }) => {
   const onDragEnd = async (result) => {
     const { source, destination, draggableId } = result;
 
-    console.log('Drag ended:', { source, destination, draggableId });
-
-    if (!destination) {
-      console.log('No destination, drag cancelled');
-      return;
-    }
+    if (!destination) return;
 
     if (
       source.droppableId === destination.droppableId &&
       source.index === destination.index
     ) {
-      console.log('Dropped in same position');
       return;
     }
 
-    // Create copies of the columns
     const sourceColumn = [...tasks[source.droppableId]];
     const destColumn = source.droppableId === destination.droppableId 
       ? sourceColumn 
       : [...tasks[destination.droppableId]];
 
-    // Find and remove the task from source
     const [movedTask] = sourceColumn.splice(source.index, 1);
     
-    if (!movedTask) {
-      console.error('Could not find task to move');
-      return;
-    }
+    if (!movedTask) return;
 
-    console.log('Moving task:', movedTask);
-
-    // Add to destination
     destColumn.splice(destination.index, 0, movedTask);
 
-    // Update state immediately (optimistic update)
     const newTasks = {
       ...tasks,
       [source.droppableId]: sourceColumn,
@@ -124,9 +109,7 @@ const KanbanBoard = ({ taskCreated, setTaskCreated }) => {
     
     setTasks(newTasks);
 
-    // Update backend
     try {
-      console.log('Updating backend for task:', draggableId);
       const response = await fetch(`${API_URL}/api/tasks/${draggableId}/move`, {
         method: 'PUT',
         headers: {
@@ -143,21 +126,18 @@ const KanbanBoard = ({ taskCreated, setTaskCreated }) => {
       if (!data.success) {
         throw new Error(data.error || 'Failed to update task');
       }
-      
-      console.log('Task moved successfully on backend');
     } catch (err) {
-      console.error('Error updating task on backend:', err);
-      // Revert on error
+      console.error('Error updating task:', err);
       fetchTasks();
     }
   };
 
   if (loading) {
     return (
-      <div className="p-6 flex items-center justify-center min-h-[400px]">
+      <div className="p-4 sm:p-6 flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading tasks...</p>
+          <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">Loading tasks...</p>
         </div>
       </div>
     );
@@ -165,13 +145,13 @@ const KanbanBoard = ({ taskCreated, setTaskCreated }) => {
 
   if (error) {
     return (
-      <div className="p-6 flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="text-red-500 mb-4 text-4xl">❌</div>
-          <p className="text-red-500 mb-4 font-semibold">{error}</p>
+      <div className="p-4 sm:p-6 flex items-center justify-center min-h-[400px]">
+        <div className="text-center px-4">
+          <div className="text-red-500 mb-4 text-3xl sm:text-4xl">❌</div>
+          <p className="text-red-500 mb-4 font-semibold text-sm sm:text-base">{error}</p>
           <button
             onClick={fetchTasks}
-            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            className="px-4 sm:px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm sm:text-base"
           >
             Retry
           </button>
@@ -184,25 +164,25 @@ const KanbanBoard = ({ taskCreated, setTaskCreated }) => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="p-6"
+      className="p-3 sm:p-4 lg:p-6"
     >
-      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
             Project Board
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-            Drag and drop tasks between columns • Hover to delete
+          <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm mt-1">
+            Drag and drop • Hover to delete
           </p>
         </div>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={fetchTasks}
-          className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center gap-2"
+          className="px-3 sm:px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center gap-2 text-sm sm:text-base w-full sm:w-auto justify-center"
         >
           <svg
-            className="w-5 h-5"
+            className="w-4 h-4 sm:w-5 sm:h-5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -219,7 +199,76 @@ const KanbanBoard = ({ taskCreated, setTaskCreated }) => {
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Mobile: Single Column View */}
+        <div className="block lg:hidden space-y-4">
+          {Object.entries(columns).map(([columnId, column]) => (
+            <div key={columnId}>
+              <motion.div
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className={`bg-gradient-to-r ${column.color} text-white rounded-lg p-3 mb-3 shadow-md`}
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-base">{column.title}</h3>
+                  <span className="bg-white bg-opacity-30 px-2 py-1 rounded-full text-sm font-bold">
+                    {tasks[columnId]?.length || 0}
+                  </span>
+                </div>
+              </motion.div>
+
+              <Droppable droppableId={columnId}>
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={`rounded-lg p-2 transition-all duration-200 min-h-[200px] ${
+                      snapshot.isDraggingOver
+                        ? 'bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-400'
+                        : 'bg-gray-50 dark:bg-gray-900/50'
+                    }`}
+                  >
+                    {tasks[columnId]?.map((task, index) => (
+                      <TaskCard 
+                        key={task.id}
+                        task={{
+                          ...task,
+                          date: task.createdAt 
+                            ? new Date(task.createdAt).toLocaleDateString()
+                            : new Date().toLocaleDateString()
+                        }} 
+                        index={index}
+                        onDelete={handleTaskDelete}
+                      />
+                    ))}
+                    {provided.placeholder}
+
+                    {(!tasks[columnId] || tasks[columnId].length === 0) && (
+                      <div className="flex flex-col items-center justify-center h-32 text-gray-400 dark:text-gray-600 text-sm">
+                        <svg
+                          className="w-10 h-10 mb-2 opacity-50"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                          />
+                        </svg>
+                        <p>Drop tasks here</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </Droppable>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop: Grid View */}
+        <div className="hidden lg:grid lg:grid-cols-2 xl:grid-cols-4 gap-4 xl:gap-6">
           {Object.entries(columns).map(([columnId, column]) => (
             <div key={columnId} className="flex flex-col">
               <motion.div

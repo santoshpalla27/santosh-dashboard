@@ -77,13 +77,13 @@ const ConnectionStatus = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="fixed bottom-6 right-6 z-50"
+      className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50"
     >
       <motion.div
         className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl overflow-hidden"
-        animate={{ width: isExpanded ? 300 : 60 }}
+        animate={{ width: isExpanded ? (window.innerWidth < 640 ? 260 : 300) : (window.innerWidth < 640 ? 48 : 60) }}
       >
-        <div className="p-3">
+        <div className="p-2 sm:p-3">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -93,9 +93,9 @@ const ConnectionStatus = () => {
             <div className="flex items-center space-x-2">
               <motion.div
                 animate={{ rotate: isExpanded ? 180 : 0 }}
-                className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center"
+                className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center"
               >
-                <span className="text-blue-600 dark:text-blue-300 text-xl">
+                <span className="text-blue-600 dark:text-blue-300 text-lg sm:text-xl">
                   {isExpanded ? '✕' : '⚡'}
                 </span>
               </motion.div>
@@ -103,7 +103,7 @@ const ConnectionStatus = () => {
                 <motion.span
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+                  className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300"
                 >
                   Connection Status
                 </motion.span>
@@ -117,7 +117,7 @@ const ConnectionStatus = () => {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="mt-4 space-y-3"
+                className="mt-3 sm:mt-4 space-y-2 sm:space-y-3"
               >
                 {Object.entries(connections).map(([key, value]) => (
                   <motion.div
@@ -126,7 +126,7 @@ const ConnectionStatus = () => {
                     animate={{ x: 0, opacity: 1 }}
                     className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg"
                   >
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
                       <motion.div
                         animate={{
                           scale: value.status === 'checking' ? [1, 1.2, 1] : 1,
@@ -135,20 +135,20 @@ const ConnectionStatus = () => {
                           duration: 1,
                           repeat: value.status === 'checking' ? Infinity : 0,
                         }}
-                        className={`w-3 h-3 rounded-full ${getStatusColor(value.status)}`}
+                        className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full flex-shrink-0 ${getStatusColor(value.status)}`}
                       />
-                      <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white capitalize">
+                      <div className="min-w-0">
+                        <p className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white capitalize truncate">
                           {key}
                         </p>
                         {value.lastCheck && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {value.lastCheck.toLocaleTimeString()}
+                          <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">
+                            {value.lastCheck.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                           </p>
                         )}
                       </div>
                     </div>
-                    <span className="text-lg">
+                    <span className="text-sm sm:text-lg flex-shrink-0">
                       {getStatusIcon(value.status)}
                     </span>
                   </motion.div>

@@ -8,18 +8,13 @@ const Dashboard = ({ taskCreated, setTaskCreated }) => {
   const [showNotification, setShowNotification] = useState(false);
 
   const tabs = [
-    { id: 'kanban', label: '📊 Kanban Board', icon: '📊' },
-    { id: 'todo', label: '✅ To-Do List', icon: '✅' },
+    { id: 'kanban', label: 'Kanban Board', icon: '📊', shortLabel: 'Kanban' },
+    { id: 'todo', label: 'To-Do List', icon: '✅', shortLabel: 'Todo' },
   ];
 
   const handleConvertToTask = (task) => {
-    // Switch to kanban tab
     setActiveTab('kanban');
-    
-    // Trigger task refresh
     setTaskCreated(task);
-    
-    // Show notification
     setShowNotification(true);
     setTimeout(() => setShowNotification(false), 3000);
   };
@@ -34,11 +29,11 @@ const Dashboard = ({ taskCreated, setTaskCreated }) => {
               initial={{ opacity: 0, y: -50 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -50 }}
-              className="fixed top-20 right-6 z-50"
+              className="fixed top-16 sm:top-20 right-3 sm:right-6 z-50 max-w-[calc(100vw-1.5rem)] sm:max-w-md"
             >
-              <div className="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3">
+              <div className="bg-green-500 text-white px-4 sm:px-6 py-3 rounded-lg shadow-lg flex items-center gap-3">
                 <svg
-                  className="w-6 h-6"
+                  className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -50,8 +45,8 @@ const Dashboard = ({ taskCreated, setTaskCreated }) => {
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <span className="font-medium">
-                  Todo converted to task successfully!
+                <span className="font-medium text-sm sm:text-base">
+                  Todo converted successfully!
                 </span>
               </div>
             </motion.div>
@@ -67,14 +62,15 @@ const Dashboard = ({ taskCreated, setTaskCreated }) => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all ${
+                className={`flex-1 px-3 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition-all text-sm sm:text-base ${
                   activeTab === tab.id
                     ? 'bg-blue-500 text-white shadow-lg'
                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
-                <span className="mr-2">{tab.icon}</span>
-                {tab.label}
+                <span className="mr-1 sm:mr-2">{tab.icon}</span>
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.shortLabel}</span>
               </motion.button>
             ))}
           </div>
