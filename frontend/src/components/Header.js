@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
 import TaskModal from './TaskModal';
+import PersonalSpace from './PersonalSpace';
 import { useAuth } from '../context/AuthContext';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -11,6 +12,7 @@ const Header = ({ onTaskCreated }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [isPersonalSpaceOpen, setIsPersonalSpaceOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -74,6 +76,29 @@ const Header = ({ onTaskCreated }) => {
 
             {/* Desktop Actions */}
             <div className="hidden md:flex items-center space-x-4">
+              {/* Personal Space Button */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsPersonalSpaceOpen(true)}
+                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all flex items-center gap-2 shadow-md"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+                  />
+                </svg>
+                <span className="hidden lg:inline">Personal Space</span>
+              </motion.button>
+
               <ThemeToggle />
               
               <motion.button
@@ -177,6 +202,27 @@ const Header = ({ onTaskCreated }) => {
 
             {/* Mobile Menu Button */}
             <div className="flex md:hidden items-center space-x-2">
+              {/* Mobile Personal Space Button */}
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setIsPersonalSpaceOpen(true)}
+                className="p-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+                  />
+                </svg>
+              </motion.button>
+
               <ThemeToggle />
               <motion.button
                 whileTap={{ scale: 0.9 }}
@@ -289,6 +335,11 @@ const Header = ({ onTaskCreated }) => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleCreateTask}
+      />
+
+      <PersonalSpace
+        isOpen={isPersonalSpaceOpen}
+        onClose={() => setIsPersonalSpaceOpen(false)}
       />
     </>
   );
