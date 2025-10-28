@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
 import TaskModal from './TaskModal';
+import PersonalSpace from './PersonalSpace';
+import ModernLogo from './ModernLogo';
 import { useAuth } from '../context/AuthContext';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -65,15 +67,8 @@ const Header = ({ onTaskCreated }) => {
       >
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16">
-            {/* Logo - Simplified */}
-            <motion.div
-              className="flex items-center"
-              whileHover={{ scale: 1.05 }}
-            >
-              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
-                Santosh Dashboard
-              </h1>
-            </motion.div>
+            {/* Modern Logo */}
+            <ModernLogo variant="gradient" onClick={() => navigate('/dashboard')} />
 
             {/* Desktop Actions */}
             <div className="hidden md:flex items-center space-x-4">
