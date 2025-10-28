@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 // Pages
 import Login from './pages/Login';
+import PersonalSpace from './pages/PersonalSpace';
 
 // Components
 import Header from './components/Header';
@@ -40,6 +41,19 @@ function App() {
                   <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors">
                     <Header onTaskCreated={handleTaskCreated} />
                     <Dashboard taskCreated={taskCreated} setTaskCreated={setTaskCreated} />
+                    <ConnectionStatus />
+                  </div>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/personal-space"
+              element={
+                <ProtectedRoute>
+                  <div className="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors">
+                    <Header onTaskCreated={handleTaskCreated} />
+                    <PersonalSpace />
                     <ConnectionStatus />
                   </div>
                 </ProtectedRoute>
