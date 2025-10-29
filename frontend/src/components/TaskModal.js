@@ -82,6 +82,13 @@ const TaskModal = ({ isOpen, onClose, onSubmit }) => {
     }
   };
 
+  const handleBackdropClick = (e) => {
+    // Only close if text is not being selected
+    if (!window.getSelection().toString().trim()) {
+      onClose();
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -91,7 +98,7 @@ const TaskModal = ({ isOpen, onClose, onSubmit }) => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-        onClick={onClose}
+        onClick={handleBackdropClick}
       >
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}

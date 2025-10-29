@@ -197,7 +197,12 @@ const RecycleBin = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-              onClick={() => setShowClearConfirm(false)}
+              onClick={() => {
+                // Only close if text is not being selected
+                if (!window.getSelection().toString().trim()) {
+                  setShowClearConfirm(false);
+                }
+              }}
             >
               <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
