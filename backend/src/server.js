@@ -12,6 +12,7 @@ const healthRoutes = require('./routes/health');
 const authRoutes = require('./routes/auth');
 const taskRoutes = require('./routes/tasks');
 const todoRoutes = require('./routes/todos');
+const personalSpaceRoutes = require('./routes/personalSpace');
 
 // Initialize express
 const app = express();
@@ -131,6 +132,7 @@ app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/todos', todoRoutes);
+app.use('/api/personal-space', personalSpaceRoutes);
 
 // 404 handler
 app.use((req, res) => {
