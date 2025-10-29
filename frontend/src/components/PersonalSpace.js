@@ -57,6 +57,8 @@ const PersonalSpace = ({ isOpen, onClose }) => {
     };
   }, []);
 
+  if (!isOpen) return null;
+
   return (
     <AnimatePresence>
       <motion.div
