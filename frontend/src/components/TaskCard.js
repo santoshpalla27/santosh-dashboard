@@ -184,7 +184,6 @@ const TaskCard = ({ task, index, onDelete, onView }) => {
                   </button>
                   <CardQuickMenu
                     task={task}
-                    onUpdate={onUpdate}
                     onDelete={() => {
                       setShowDeleteDialog(true);
                     }}
@@ -325,7 +324,6 @@ const TaskCard = ({ task, index, onDelete, onView }) => {
                   </div>
                 )}
               </div>
-            </div>
 
             {/* Hover Overlay Effect */}
             <div className="absolute inset-0 bg-gradient-to-t from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
