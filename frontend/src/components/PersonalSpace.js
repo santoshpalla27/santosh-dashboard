@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const PersonalSpace = ({ isOpen, onClose }) => {
@@ -15,12 +15,47 @@ const PersonalSpace = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
+  const [isSelecting, setIsSelecting] = useState(false);
+
   const handleBackdropClick = (e) => {
-    // Only close if text is not being selected
-    if (!window.getSelection().toString().trim()) {
+    // Only close if not in the middle of a text selection
+    if (!isSelecting && !window.getSelection().toString().trim()) {
       onClose();
     }
   };
+
+  const handleMouseDown = () => {
+    // Track when user starts interacting with the dialog content
+    setIsSelecting(true);
+  };
+
+  const handleMouseUp = () => {
+    // Use setTimeout to allow selection to be completed before checking
+    setTimeout(() => {
+      setIsSelecting(!window.getSelection().toString().trim() ? false : true);
+    }, 0);
+  };
+
+  const handleMouseMove = () => {
+    // If we're in selection and there's text selected, continue tracking
+    if (window.getSelection().toString().trim()) {
+      setIsSelecting(true);
+    }
+  };
+
+  // Also check for selection changes
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      if (!window.getSelection().toString().trim()) {
+        setIsSelecting(false);
+      }
+    };
+
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () => {
+      document.removeEventListener('selectionchange', handleSelectionChange);
+    };
+  }, []);
 
   return (
     <AnimatePresence>
@@ -37,6 +72,9 @@ const PersonalSpace = ({ isOpen, onClose }) => {
           exit={{ scale: 0.9, opacity: 0, y: 50 }}
           className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
           onClick={(e) => e.stopPropagation()}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          onMouseMove={handleMouseMove}
         >
           {/* Header */}
           <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-6 flex-shrink-0">

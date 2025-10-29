@@ -9,6 +9,21 @@ const RecycleBin = () => {
   const [error, setError] = useState(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
+  const [isSelecting, setIsSelecting] = useState(false);
+
+  // Also check for selection changes
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      if (!window.getSelection().toString().trim()) {
+        setIsSelecting(false);
+      }
+    };
+
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () => {
+      document.removeEventListener('selectionchange', handleSelectionChange);
+    };
+  }, []);
 
   const fetchDeletedTasks = async () => {
     try {
@@ -198,8 +213,8 @@ const RecycleBin = () => {
               exit={{ opacity: 0 }}
               className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
               onClick={() => {
-                // Only close if text is not being selected
-                if (!window.getSelection().toString().trim()) {
+                // Only close if not in the middle of a text selection
+                if (!isSelecting && !window.getSelection().toString().trim()) {
                   setShowClearConfirm(false);
                 }
               }}
@@ -210,6 +225,22 @@ const RecycleBin = () => {
                 exit={{ scale: 0.9, opacity: 0 }}
                 className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-md w-full"
                 onClick={(e) => e.stopPropagation()}
+                onMouseDown={() => {
+                  // Track when user starts interacting with the dialog content
+                  setIsSelecting(true);
+                }}
+                onMouseUp={() => {
+                  // Use setTimeout to allow selection to be completed before checking
+                  setTimeout(() => {
+                    setIsSelecting(!window.getSelection().toString().trim() ? false : true);
+                  }, 0);
+                }}
+                onMouseMove={() => {
+                  // If we're in selection and there's text selected, continue tracking
+                  if (window.getSelection().toString().trim()) {
+                    setIsSelecting(true);
+                  }
+                }}
               >
                 <div className="p-6">
                   <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/20 mb-4">

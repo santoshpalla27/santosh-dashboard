@@ -130,12 +130,47 @@ const RecycleBinModal = ({ isOpen, onClose, onTaskRestored }) => {
     return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
   };
 
+  const [isSelecting, setIsSelecting] = useState(false);
+
   const handleBackdropClick = (e) => {
-    // Only close if text is not being selected
-    if (!window.getSelection().toString().trim()) {
+    // Only close if not in the middle of a text selection
+    if (!isSelecting && !window.getSelection().toString().trim()) {
       onClose();
     }
   };
+
+  const handleMouseDown = () => {
+    // Track when user starts interacting with the dialog content
+    setIsSelecting(true);
+  };
+
+  const handleMouseUp = () => {
+    // Use setTimeout to allow selection to be completed before checking
+    setTimeout(() => {
+      setIsSelecting(!window.getSelection().toString().trim() ? false : true);
+    }, 0);
+  };
+
+  const handleMouseMove = () => {
+    // If we're in selection and there's text selected, continue tracking
+    if (window.getSelection().toString().trim()) {
+      setIsSelecting(true);
+    }
+  };
+
+  // Also check for selection changes
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      if (!window.getSelection().toString().trim()) {
+        setIsSelecting(false);
+      }
+    };
+
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () => {
+      document.removeEventListener('selectionchange', handleSelectionChange);
+    };
+  }, []);
 
   if (!isOpen) return null;
 
@@ -154,6 +189,9 @@ const RecycleBinModal = ({ isOpen, onClose, onTaskRestored }) => {
           exit={{ scale: 0.9, opacity: 0 }}
           className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
           onClick={(e) => e.stopPropagation()}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          onMouseMove={handleMouseMove}
         >
           {/* Header */}
           <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
@@ -321,8 +359,8 @@ const RecycleBinModal = ({ isOpen, onClose, onTaskRestored }) => {
               exit={{ opacity: 0 }}
               className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
               onClick={() => {
-                // Only close if text is not being selected
-                if (!window.getSelection().toString().trim()) {
+                // Only close if not in the middle of a text selection
+                if (!isSelecting && !window.getSelection().toString().trim()) {
                   setShowClearConfirm(false);
                 }
               }}
@@ -333,6 +371,9 @@ const RecycleBinModal = ({ isOpen, onClose, onTaskRestored }) => {
                 exit={{ scale: 0.9, opacity: 0 }}
                 className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-md w-full"
                 onClick={(e) => e.stopPropagation()}
+                onMouseDown={handleMouseDown}
+                onMouseUp={handleMouseUp}
+                onMouseMove={handleMouseMove}
               >
                 <div className="p-6">
                   <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/20 mb-4">

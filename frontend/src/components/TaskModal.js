@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const TaskModal = ({ isOpen, onClose, onSubmit }) => {
@@ -82,12 +82,47 @@ const TaskModal = ({ isOpen, onClose, onSubmit }) => {
     }
   };
 
+  const [isSelecting, setIsSelecting] = useState(false);
+
   const handleBackdropClick = (e) => {
-    // Only close if text is not being selected
-    if (!window.getSelection().toString().trim()) {
+    // Only close if not in the middle of a text selection
+    if (!isSelecting && !window.getSelection().toString().trim()) {
       onClose();
     }
   };
+
+  const handleMouseDown = () => {
+    // Track when user starts interacting with the dialog content
+    setIsSelecting(true);
+  };
+
+  const handleMouseUp = () => {
+    // Use setTimeout to allow selection to be completed before checking
+    setTimeout(() => {
+      setIsSelecting(!window.getSelection().toString().trim() ? false : true);
+    }, 0);
+  };
+
+  const handleMouseMove = () => {
+    // If we're in selection and there's text selected, continue tracking
+    if (window.getSelection().toString().trim()) {
+      setIsSelecting(true);
+    }
+  };
+
+  // Also check for selection changes
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      if (!window.getSelection().toString().trim()) {
+        setIsSelecting(false);
+      }
+    };
+
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () => {
+      document.removeEventListener('selectionchange', handleSelectionChange);
+    };
+  }, []);
 
   if (!isOpen) return null;
 
@@ -106,6 +141,9 @@ const TaskModal = ({ isOpen, onClose, onSubmit }) => {
           exit={{ scale: 0.9, opacity: 0 }}
           className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto mx-4"
           onClick={(e) => e.stopPropagation()}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          onMouseMove={handleMouseMove}
         >
           <div className="p-6">
             {/* Header */}
