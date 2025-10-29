@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const PersonalSpace = ({ isOpen, onClose }) => {
   const [activeSection, setActiveSection] = useState('notes');
+  const [isSelecting, setIsSelecting] = useState(false);
 
   const sections = [
     { id: 'notes', label: 'Notes', icon: '📝' },
@@ -13,13 +14,23 @@ const PersonalSpace = ({ isOpen, onClose }) => {
     { id: 'resources', label: 'Resources', icon: '📚' },
   ];
 
-  if (!isOpen) return null;
+  // Also check for selection changes
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      if (!window.getSelection().toString().trim()) {
+        setIsSelecting(false);
+      }
+    };
 
-  const [isSelecting, setIsSelecting] = useState(false);
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () => {
+      document.removeEventListener('selectionchange', handleSelectionChange);
+    };
+  }, []);
 
   const handleBackdropClick = (e) => {
     // Only close if not in the middle of a text selection
-    if (!isSelecting && !window.getSelection().toString().trim()) {
+    if (isOpen && !isSelecting && !window.getSelection().toString().trim()) {
       onClose();
     }
   };
@@ -42,20 +53,6 @@ const PersonalSpace = ({ isOpen, onClose }) => {
       setIsSelecting(true);
     }
   };
-
-  // Also check for selection changes
-  useEffect(() => {
-    const handleSelectionChange = () => {
-      if (!window.getSelection().toString().trim()) {
-        setIsSelecting(false);
-      }
-    };
-
-    document.addEventListener('selectionchange', handleSelectionChange);
-    return () => {
-      document.removeEventListener('selectionchange', handleSelectionChange);
-    };
-  }, []);
 
   if (!isOpen) return null;
 

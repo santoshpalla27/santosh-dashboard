@@ -132,9 +132,23 @@ const RecycleBinModal = ({ isOpen, onClose, onTaskRestored }) => {
 
   const [isSelecting, setIsSelecting] = useState(false);
 
+  // Also check for selection changes
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      if (!window.getSelection().toString().trim()) {
+        setIsSelecting(false);
+      }
+    };
+
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () => {
+      document.removeEventListener('selectionchange', handleSelectionChange);
+    };
+  }, []);
+
   const handleBackdropClick = (e) => {
     // Only close if not in the middle of a text selection
-    if (!isSelecting && !window.getSelection().toString().trim()) {
+    if (isOpen && !isSelecting && !window.getSelection().toString().trim()) {
       onClose();
     }
   };
@@ -157,20 +171,6 @@ const RecycleBinModal = ({ isOpen, onClose, onTaskRestored }) => {
       setIsSelecting(true);
     }
   };
-
-  // Also check for selection changes
-  useEffect(() => {
-    const handleSelectionChange = () => {
-      if (!window.getSelection().toString().trim()) {
-        setIsSelecting(false);
-      }
-    };
-
-    document.addEventListener('selectionchange', handleSelectionChange);
-    return () => {
-      document.removeEventListener('selectionchange', handleSelectionChange);
-    };
-  }, []);
 
   if (!isOpen) return null;
 
