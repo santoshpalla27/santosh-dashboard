@@ -15,6 +15,42 @@ const validateTask = [
     .optional()
     .isIn(['low', 'medium', 'high'])
     .withMessage('Invalid priority'),
+  body('coverImage')
+    .optional()
+    .isString()
+    .withMessage('Cover image must be a string'),
+  body('cardColor')
+    .optional()
+    .isString()
+    .withMessage('Card color must be a string'),
+  body('checklist')
+    .optional()
+    .isArray()
+    .withMessage('Checklist must be an array'),
+  body('checklist.*.id')
+    .optional()
+    .isString()
+    .withMessage('Checklist item ID must be a string'),
+  body('checklist.*.text')
+    .optional()
+    .isString()
+    .withMessage('Checklist item text must be a string'),
+  body('checklist.*.completed')
+    .optional()
+    .isBoolean()
+    .withMessage('Checklist item completed must be a boolean'),
+  body('checklist.*.order')
+    .optional()
+    .isNumeric()
+    .withMessage('Checklist item order must be a number'),
+  body('members')
+    .optional()
+    .isArray()
+    .withMessage('Members must be an array'),
+  body('members.*')
+    .optional()
+    .isString()
+    .withMessage('Each member must be a string'),
 ];
 
 // @route   GET /api/tasks

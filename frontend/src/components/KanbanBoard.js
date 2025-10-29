@@ -8,10 +8,34 @@ import RecycleBinModal from './RecycleBinModal';
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const columns = {
-  backlog: { title: 'Backlog', color: 'from-gray-500 to-gray-600' },
-  inProgress: { title: 'In Progress', color: 'from-blue-500 to-blue-600' },
-  inReview: { title: 'In Review', color: 'from-yellow-500 to-yellow-600' },
-  done: { title: 'Done', color: 'from-green-500 to-green-600' },
+  backlog: { 
+    title: 'Backlog', 
+    color: 'from-gray-500 to-gray-600',
+    icon: '📋',
+    lightBg: 'bg-gray-50',
+    darkBg: 'dark:bg-gray-900/50'
+  },
+  inProgress: { 
+    title: 'In Progress', 
+    color: 'from-blue-500 to-blue-600',
+    icon: '🔄',
+    lightBg: 'bg-blue-50',
+    darkBg: 'dark:bg-blue-900/20'
+  },
+  inReview: { 
+    title: 'In Review', 
+    color: 'from-yellow-500 to-yellow-600',
+    icon: '👀',
+    lightBg: 'bg-yellow-50',
+    darkBg: 'dark:bg-yellow-900/20'
+  },
+  done: { 
+    title: 'Done', 
+    color: 'from-green-500 to-green-600',
+    icon: '✅',
+    lightBg: 'bg-green-50',
+    darkBg: 'dark:bg-green-900/20'
+  },
 };
 
 const KanbanBoard = ({ taskCreated, setTaskCreated }) => {
@@ -268,16 +292,25 @@ const KanbanBoard = ({ taskCreated, setTaskCreated }) => {
         <div className="block lg:hidden space-y-4">
           {Object.entries(columns).map(([columnId, column]) => (
             <div key={columnId}>
+              {/* Column Header - Planka Style */}
               <motion.div
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className={`bg-gradient-to-r ${column.color} text-white rounded-lg p-3 mb-3 shadow-md`}
+                className={`bg-gradient-to-r ${column.color} text-white rounded-xl p-4 mb-3 shadow-sm flex items-center justify-between`}
               >
-                <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">{column.icon}</span>
                   <h3 className="font-semibold text-base">{column.title}</h3>
-                  <span className="bg-white bg-opacity-30 px-2 py-1 rounded-full text-sm font-bold">
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-white bg-opacity-30 px-2.5 py-1 rounded-full text-sm font-bold">
                     {tasks[columnId]?.length || 0}
                   </span>
+                  <div className="w-6 h-6 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                    </svg>
+                  </div>
                 </div>
               </motion.div>
 
@@ -286,10 +319,10 @@ const KanbanBoard = ({ taskCreated, setTaskCreated }) => {
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`rounded-lg p-2 transition-all duration-200 min-h-[200px] ${
+                    className={`rounded-xl p-3 transition-all duration-200 min-h-[200px] ${
                       snapshot.isDraggingOver
                         ? 'bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-400'
-                        : 'bg-gray-50 dark:bg-gray-900/50'
+                        : `${column.lightBg} ${column.darkBg}`
                     }`}
                   >
                     {tasks[columnId]?.map((task, index) => (
@@ -336,17 +369,26 @@ const KanbanBoard = ({ taskCreated, setTaskCreated }) => {
         {/* Desktop: Grid View */}
         <div className="hidden lg:grid lg:grid-cols-2 xl:grid-cols-4 gap-4 xl:gap-6">
           {Object.entries(columns).map(([columnId, column]) => (
-            <div key={columnId} className="flex flex-col">
+            <div key={columnId} className="flex flex-col h-full">
+              {/* Column Header - Planka Style */}
               <motion.div
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className={`bg-gradient-to-r ${column.color} text-white rounded-lg p-4 mb-4 shadow-md`}
+                className={`bg-gradient-to-r ${column.color} text-white rounded-xl p-4 mb-4 shadow-sm flex items-center justify-between`}
               >
-                <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">{column.icon}</span>
                   <h3 className="font-semibold text-lg">{column.title}</h3>
-                  <span className="bg-white bg-opacity-30 px-3 py-1 rounded-full text-sm font-bold">
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-white bg-opacity-30 px-2.5 py-1 rounded-full text-sm font-bold">
                     {tasks[columnId]?.length || 0}
                   </span>
+                  <div className="w-6 h-6 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                    </svg>
+                  </div>
                 </div>
               </motion.div>
 
@@ -355,10 +397,10 @@ const KanbanBoard = ({ taskCreated, setTaskCreated }) => {
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`flex-1 rounded-lg p-3 transition-all duration-200 min-h-[500px] ${
+                    className={`flex-1 rounded-xl p-3 transition-all duration-200 min-h-[500px] ${
                       snapshot.isDraggingOver
                         ? 'bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-400 ring-opacity-50'
-                        : 'bg-gray-50 dark:bg-gray-900/50'
+                        : `${column.lightBg} ${column.darkBg}`
                     }`}
                   >
                     {tasks[columnId]?.map((task, index) => (
@@ -380,7 +422,7 @@ const KanbanBoard = ({ taskCreated, setTaskCreated }) => {
                     {(!tasks[columnId] || tasks[columnId].length === 0) && (
                       <div className="flex flex-col items-center justify-center h-32 text-gray-400 dark:text-gray-600 text-sm">
                         <svg
-                          className="w-12 h-12 mb-2 opacity-50"
+                          className="w-10 h-10 mb-2 opacity-50"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"

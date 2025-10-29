@@ -55,6 +55,31 @@ const taskSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
+    // NEW: Cover image
+    coverImage: {
+      type: String,
+      default: null,
+    },
+    // NEW: Card background color
+    cardColor: {
+      type: String,
+      default: null,
+    },
+    // NEW: Checklist items
+    checklist: {
+      type: [{
+        id: String,
+        text: String,
+        completed: Boolean,
+        order: Number,
+      }],
+      default: [],
+    },
+    // NEW: Members/collaborators
+    members: {
+      type: [String],
+      default: [],
+    },
   },
   {
     timestamps: true,
